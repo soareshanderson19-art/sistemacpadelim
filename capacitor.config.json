@@ -1,0 +1,21 @@
+{
+  "appId": "br.com.cpad.elim",
+  "appName": "CPAD ELIM",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": true,
+    "backgroundColor": "#b5177b"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#b5177b",
+      "androidSplashResourceName": "splash",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "LIGHT",
+      "backgroundColor": "#b5177b"
+    }
+  }
+}
