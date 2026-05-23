@@ -1,0 +1,53 @@
+name: 🌐 Deploy GitHub Pages — CPAD ELIM
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy para GitHub Pages
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      # ── 1. Checkout ────────────────────────────────────────────
+      - name: 📥 Checkout do repositório
+        uses: actions/checkout@v4
+
+      # ── 2. Configurar Pages ────────────────────────────────────
+      - name: ⚙️ Configurar GitHub Pages
+        uses: actions/configure-pages@v5
+
+      # ── 3. Upload dos arquivos ─────────────────────────────────
+      - name: 📦 Upload arquivos do site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Envia todos os arquivos web (index.html, style.css, script.js, logo)
+          path: '.'
+
+      # ── 4. Deploy ──────────────────────────────────────────────
+      - name: 🚀 Deploy para GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      # ── 5. Resumo ──────────────────────────────────────────────
+      - name: ✅ Resumo do Deploy
+        run: |
+          echo "## 🌐 CPAD ELIM — Deploy concluído!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **URL do site:** ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "O sistema já está acessível publicamente pelo link acima." >> $GITHUB_STEP_SUMMARY
