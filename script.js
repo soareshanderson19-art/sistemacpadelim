@@ -531,6 +531,11 @@ function gerarPDF(id) {
   const c = cadastros.find(x => x.id === id);
   if (!c) return;
 
+  if (!window.jspdf) {
+    mostrarToast('Biblioteca PDF não carregada. Verifique sua conexão.', 'error');
+    return;
+  }
+
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
 
@@ -708,12 +713,39 @@ function gerarPDF(id) {
   doc.text('Documento gerado automaticamente pelo sistema.', ML, footerY);
 
   const nomeArquivo = (c.nome || 'cadastro').replace(/\s+/g, '_').toLowerCase();
-  doc.save(`CPAD_ELIM_${nomeArquivo}_${Date.now()}.pdf`);
+  const nomeCompleto = `CPAD_ELIM_${nomeArquivo}_${Date.now()}.pdf`;
 
-  pdfCount++;
-  localStorage.setItem(LS_PDFS, pdfCount);
-  atualizarSummary();
-  mostrarToast('PDF gerado com sucesso!', 'success');
+  try {
+    const blob = doc.output('blob');
+    const url  = URL.createObjectURL(blob);
+
+    const isCapacitor = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+
+    if (isCapacitor) {
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 3000);
+    } else {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = nomeCompleto;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 3000);
+    }
+
+    pdfCount++;
+    localStorage.setItem(LS_PDFS, pdfCount);
+    atualizarSummary();
+    mostrarToast('PDF gerado com sucesso!', 'success');
+  } catch (err) {
+    console.error('Erro ao gerar PDF:', err);
+    mostrarToast('Erro ao gerar PDF. Tente novamente.', 'error');
+  }
 }
 
 /* --- Helpers PDF --- */
